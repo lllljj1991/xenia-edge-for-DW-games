@@ -17,6 +17,7 @@
 #include <tuple>
 
 #include "xenia/apu/xma_context.h"
+#include "xenia/base/ring_buffer.h"
 #include "xenia/memory.h"
 #include "xenia/xbox.h"
 
@@ -32,6 +33,9 @@ namespace apu {
 
 class XmaContextMaster : public XmaContext {
  public:
+  static constexpr uint32_t kBitsPerPacketHeader = 32;
+  static constexpr uint32_t kMaxFrameSizeinBits = 0x4000 - kBitsPerPacketHeader;
+
   explicit XmaContextMaster();
   ~XmaContextMaster();
 
@@ -89,6 +93,20 @@ class XmaContextMaster : public XmaContext {
   // conversion buffer for 2 channel frame
   std::array<uint8_t, kBytesPerFrameChannel * 2> raw_frame_;
   // std::vector<uint8_t> current_frame_ = std::vector<uint8_t>(0);
+
+  // Subframe processing state (from new version)
+  int32_t remaining_subframe_blocks_in_output_buffer_ = 0;
+  uint8_t current_frame_remaining_subframes_ = 0;
+
+  // Loop subframe precision state
+  uint8_t loop_frame_output_limit_ = 0;
+  bool loop_start_skip_pending_ = false;
+
+  // Helper functions for subframe processing
+  void Consume(RingBuffer* XE_RESTRICT output_rb,
+               const XMA_CONTEXT_DATA* const XE_RESTRICT data);
+  RingBuffer PrepareOutputRingBuffer(XMA_CONTEXT_DATA* data);
+  void UpdateLoopStatus(XMA_CONTEXT_DATA* data);
 };
 
 }  // namespace apu

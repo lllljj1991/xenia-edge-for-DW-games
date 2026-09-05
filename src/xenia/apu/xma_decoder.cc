@@ -68,7 +68,7 @@ DEFINE_bool(use_dedicated_xma_thread, false,
 UPDATE_from_bool(use_dedicated_xma_thread, 2026, 8, 21, 0, true);
 
 DEFINE_string(
-    xma_decoder, "new",
+    xma_decoder, "master",
     "Decoder version used to process XMA audio.\n"
     "Use: [fake, master, old, new]\n"
     " fake: \n  No audio will be decoded.\n"
